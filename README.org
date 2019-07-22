@@ -1,0 +1,56 @@
+Identification of a drill string.
+
+* state space, tutorial
+https://lpsa.swarthmore.edu/Representations/SysRepSS.html#Developing_MechR
+https://lpsa.swarthmore.edu/Systems/MechRotating/RotMechSysModel.html#Free_Body_Diagrams_
+
+* Model updating (or tricks)
+From prof. Thomas Abrahamsson(thomas.abrahamsson@chalmers.se, https://www.chalmers.se/en/staff/Pages/thab.aspx)
+** match eigen frequencies
+- Minimize diff. in location of eigs
+  + did not work
+- Instead match eigs of same modes
+  + but difficult for many modes. We want to avoid this
+  + Also difficult because of damping(different for each mode)
+** Use modified state space model for comparison
+- Do not use raw data. Use state space identified model to compare with
+- Modify SS model with artificial damping
+  + Assign same damping ratio to all modes.
+  + Use same damping ratio for FE model
+  + This avoid the difficulty with mode matching
+The damping from a SS model is
+  Re(λ₁) = ζᵢIm(λᵢ)
+Now; instead we chose eg. ζ₀ = 1%, update the eigenvalues and A using the modified λ's
+  Re(λ₁) = ζ₀Im(λᵢ)
+That is; update the real part of λ, but keep the imaginary(the oscillating part)
+Modify FE model, constructing C so it have the same proportional damping.
+
+** Use logarithmic cost function
+δ = QᴴQ/N, Q = log10(vect(Gₘ(θ)) - log10(vect(Gₑₓₚ))
+where Gₘ and and Gₑₓₚ are the transfer functions of the FEM and state space
+model respectively. θ is the parameter vector of the FEM and N the number of
+samples in the FFT calculation.
+
+Without log, the biggest difference will be largest around the test- or model
+resonances. With log, the cost function get smoothed.
+
+- Use logarithmic frequency sampling (WHAT IS THIS?). I wrote p1/2bw in notes.
+  Maybe it is =s/z=, frequency variable in transfer function.
+  + Linear steps gives denser grid at high frequencies modes
+  + Log steps gives balanced grid for all modes
+
+** misc
+- Goodness numbers for FRF
+  + NRMSE - some number from id-toolbox
+  + Log FRAC - log cost function
+  + Residual ratio(i think ratio) ?
+** Reference
+Gibanica, M. ; Abrahamsson, T. ; Olsson, M. (2016)
+Calibration, Validation andUncertainty Quantification of Nominally Identical Car Subframes, IMAC
+http://dx.doi.org/10.1007/978-3-319-29754-5_31
+
++ 2017 IMAC paper
+
+FEMCALI
+FEM calibration software,
+https://www.mathworks.com/matlabcentral/fileexchange/44317-femcali
